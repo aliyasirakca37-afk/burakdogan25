@@ -29,15 +29,20 @@ window.EVENT = {
     "",
     "Bu yıl konsept biraz farklı.",
     "",
-    "Bu gece kimse kaybetmeyecek; ama kazanan çok olacak.",
-    "",
-    "Yeni yaşımda alışılmışın dışına birlikte çıkmak için hepinizi yanımda görmek istiyorum.",
+    "Yeni yaşımda alışılmışın dışına birlikte çıkmak için hepinizi yanımda görmeyi bekliyorum.",
     "",
     "Kartlar dağıtıldı. Yerinizi alın."
   ],
 
-  // Yazı makinesi hızı (milisaniye / harf). Daha yavaş için büyüt.
+  // Açılışın genel hızı. 1 = ilk tasarımdaki tempo; 1.35 = yaklaşık üçte bir daha hızlı.
+  // Geçişler, beklemeler, yazı makinesi ve okuma süresi bu çarpana bölünür.
+  pace: 1.35,
+
+  // Yazı makinesi hızı (milisaniye / harf, pace uygulanmadan önce). Daha yavaş için büyüt.
   typeSpeed: 46,
-  // Metin bittikten sonra okuma süresi (milisaniye)
-  readHold: 4500
+  // Metin bittikten sonra okuma süresi (milisaniye, pace uygulanmadan önce)
+  readHold: 4500,
+
+  // Bir davetlinin yanında getirebileceği en fazla kişi sayısı (sunucu 20'den fazlasını kabul etmez)
+  maxCompanions: 20
 };

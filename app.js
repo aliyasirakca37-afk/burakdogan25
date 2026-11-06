@@ -1,4 +1,4 @@
-/* Davet: eldiven belirir → el sallar → yumruk olur → ekranı üç kez çalar (sesli) →
+/* Davet: eldiven yandan belirir → yumruk olur → ekranı üç kez çalar (sesli) →
    "Are you ready?" → yazı makinesi → ekran kararır → davet kartı ve katılım. */
 (() => {
   "use strict";
@@ -27,6 +27,11 @@
   const soundHint = $("#sound-hint");
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* Genel tempo: config.js içindeki pace. Bütün süreler bu çarpana bölünür. */
+  const PACE = Math.min(3, Math.max(0.5, Number(E.pace) || 1));
+  const ms = (v) => Math.round(v / PACE);
+  document.documentElement.style.setProperty("--scene-fade", (1.1 / PACE).toFixed(2) + "s");
 
   /* ---------- İçerik ---------- */
   function letterString() {
@@ -162,7 +167,7 @@
   /* ---------- Yazı makinesi ---------- */
   async function typeLetter(token) {
     const text = letterString();
-    const speed = Math.max(10, Number(E.typeSpeed) || 46);
+    const speed = Math.max(8, ms(Number(E.typeSpeed) || 46));
     typed.textContent = "";
     const out = document.createTextNode("");
     const cursor = document.createElement("span");
@@ -174,9 +179,9 @@
       const ch = text[i];
       out.data += ch;
       let wait = speed + (Math.random() - 0.5) * speed * 0.6;
-      if (ch === "\n") wait = text[i + 1] === "\n" ? 120 : 620;
-      else if (".!?".includes(ch)) wait = 560;
-      else if (",;:".includes(ch)) wait = 280;
+      if (ch === "\n") wait = text[i + 1] === "\n" ? ms(120) : ms(620);
+      else if (".!?".includes(ch)) wait = ms(560);
+      else if (",;:".includes(ch)) wait = ms(280);
       await sleep(wait);
     }
     typed.setAttribute("aria-hidden", "false");
@@ -200,16 +205,16 @@
     // yazı tiplerini bekle (en fazla 1.8 sn)
     await Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), sleep(1800)]);
     if (!alive(token)) return;
-    await sleep(600);
+    await sleep(ms(600));
     if (!alive(token)) return;
 
     // Eldiven yandan belirir (sallamaz)
     await animate(glove, [
       { transform: "translateX(70vw) rotate(8deg)", opacity: 0 },
       { transform: "translateX(0) rotate(0deg)", opacity: 1 }
-    ], { duration: 1500, easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" });
+    ], { duration: ms(1500), easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" });
     if (!alive(token)) return;
-    await sleep(700);
+    await sleep(ms(700));
     if (!alive(token)) return;
 
     // Yumruk olur
@@ -219,7 +224,7 @@
     animate(gOpen, [{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: "forwards" });
     await animate(gFist, [{ opacity: 0 }, { opacity: 1 }], { duration: 200, fill: "forwards" });
     if (!alive(token)) return;
-    await sleep(520);
+    await sleep(ms(520));
     if (!alive(token)) return;
 
     // Üç kez ekranı çalar (izleyiciye doğru)
@@ -227,20 +232,20 @@
     for (let i = 0; i < 3; i++) {
       await knock(token, i === 2 ? 1.1 : 1);
       if (!alive(token)) return;
-      await sleep(gaps[i]);
+      await sleep(ms(gaps[i]));
       if (!alive(token)) return;
     }
     soundHint.hidden = true;
-    await sleep(900);
+    await sleep(ms(900));
     if (!alive(token)) return;
 
     // Eldiven yandan çekilir
     await animate(glove, [
       { transform: "translateX(0) scale(1)", opacity: 1 },
       { transform: "translateX(70vw) scale(0.95)", opacity: 0 }
-    ], { duration: 900, easing: "cubic-bezier(.5,0,.8,.4)", fill: "forwards" });
+    ], { duration: ms(900), easing: "cubic-bezier(.5,0,.8,.4)", fill: "forwards" });
     if (!alive(token)) return;
-    await sleep(500);
+    await sleep(ms(500));
     if (!alive(token)) return;
 
     // Are you ready?
@@ -249,26 +254,26 @@
     await animate(readyWrap, [
       { opacity: 0, transform: "translateY(14px)", letterSpacing: "0.12em" },
       { opacity: 1, transform: "translateY(0)", letterSpacing: "0.04em" }
-    ], { duration: 2400, easing: "cubic-bezier(.2,.6,.2,1)", fill: "forwards" });
+    ], { duration: ms(2400), easing: "cubic-bezier(.2,.6,.2,1)", fill: "forwards" });
     if (!alive(token)) return;
-    await sleep(2600);
+    await sleep(ms(2600));
     if (!alive(token)) return;
-    await animate(readyWrap, [{ opacity: 1 }, { opacity: 0 }], { duration: 1500, easing: "ease-in", fill: "forwards" });
+    await animate(readyWrap, [{ opacity: 1 }, { opacity: 0 }], { duration: ms(1500), easing: "ease-in", fill: "forwards" });
     if (!alive(token)) return;
 
     // Mektup
     show("letter");
-    await sleep(900);
+    await sleep(ms(900));
     if (!alive(token)) return;
     await typeLetter(token);
     if (!alive(token)) return;
-    await sleep(Math.max(1500, Number(E.readHold) || 4500));
+    await sleep(Math.max(1200, ms(Number(E.readHold) || 4500)));
     if (!alive(token)) return;
 
     // Ekran koyulaşır
-    await animate(blackout, [{ opacity: 0 }, { opacity: 1 }], { duration: 1700, easing: "ease-in-out", fill: "forwards" });
+    await animate(blackout, [{ opacity: 0 }, { opacity: 1 }], { duration: ms(1700), easing: "ease-in-out", fill: "forwards" });
     if (!alive(token)) return;
-    await sleep(900);
+    await sleep(ms(900));
     if (!alive(token)) return;
 
     finish(token);
@@ -287,7 +292,7 @@
     if (!reduceMotion) {
       if (fromBlack) {
         blackout.style.opacity = "1";
-        animate(blackout, [{ opacity: 1 }, { opacity: 0 }], { duration: 1600, easing: "ease-out", fill: "forwards" })
+        animate(blackout, [{ opacity: 1 }, { opacity: 0 }], { duration: ms(1600), easing: "ease-out", fill: "forwards" })
           .then(() => { blackout.style.opacity = "0"; });
       } else {
         blackout.style.opacity = "0";
@@ -295,7 +300,7 @@
       animate(card, [
         { opacity: 0, transform: "translateY(18px)" },
         { opacity: 1, transform: "translateY(0)" }
-      ], { duration: 1400, easing: "cubic-bezier(.2,.6,.2,1)" });
+      ], { duration: ms(1400), easing: "cubic-bezier(.2,.6,.2,1)" });
     } else {
       blackout.style.opacity = "0";
     }
@@ -317,6 +322,11 @@
   const submitBtn = $("#submit");
   const statusEl = $("#status");
   const done = $("#done");
+  const companionsBox = $("#companions");
+  const companionRows = $("#companion-rows");
+  const addCompanionBtn = $("#add-companion");
+  const companionsHelp = $("#companions-help");
+  const MAX_COMPANIONS = Math.min(20, Math.max(1, Number(E.maxCompanions) || 20));
   let answer = null;
 
   const LS = {
@@ -333,10 +343,81 @@
     return id;
   }
 
+  /* ---------- Yanında getirilen kişiler ---------- */
+  function companionInputs() {
+    return Array.from(companionRows.querySelectorAll("input"));
+  }
+  function relabelCompanions() {
+    const inputs = companionInputs();
+    inputs.forEach((inp, i) => inp.setAttribute("aria-label", `${i + 1}. misafirin adı ve soyadı`));
+    addCompanionBtn.hidden = inputs.length >= MAX_COMPANIONS;
+  }
+  function addCompanionRow(value, focus) {
+    if (companionInputs().length >= MAX_COMPANIONS) return null;
+    const row = document.createElement("div");
+    row.className = "companion-row";
+    const inp = document.createElement("input");
+    inp.type = "text";
+    inp.className = "field";
+    inp.maxLength = 80;
+    inp.autocomplete = "off";
+    inp.spellcheck = false;
+    inp.placeholder = "Misafirin adı ve soyadı";
+    inp.value = value || "";
+    inp.addEventListener("input", () => {
+      inp.removeAttribute("aria-invalid");
+      companionsHelp.textContent = "";
+      companionsHelp.classList.remove("is-error");
+    });
+    const rm = document.createElement("button");
+    rm.type = "button";
+    rm.className = "row-remove";
+    rm.setAttribute("aria-label", "Bu kişiyi çıkar");
+    rm.textContent = "×";
+    rm.addEventListener("click", () => {
+      // Tek satır kaldıysa silmek yerine boşalt; alan hep görünür kalsın.
+      if (companionInputs().length <= 1) { inp.value = ""; inp.focus(); }
+      else {
+        const next = row.nextElementSibling || row.previousElementSibling;
+        row.remove();
+        relabelCompanions();
+        const target = next && next.querySelector("input");
+        if (target) target.focus();
+      }
+      companionsHelp.textContent = "";
+      companionsHelp.classList.remove("is-error");
+    });
+    row.append(inp, rm);
+    companionRows.appendChild(row);
+    relabelCompanions();
+    if (focus) inp.focus();
+    return inp;
+  }
+  function setCompanions(list) {
+    companionRows.textContent = "";
+    (list && list.length ? list : [""]).slice(0, MAX_COMPANIONS).forEach((v) => addCompanionRow(v, false));
+    companionsHelp.textContent = "";
+    companionsHelp.classList.remove("is-error");
+  }
+  function savedCompanions() {
+    try {
+      const v = JSON.parse(LS.get("davet.companions") || "[]");
+      return Array.isArray(v) ? v.filter((x) => typeof x === "string").slice(0, MAX_COMPANIONS) : [];
+    } catch (e) { return []; }
+  }
+  addCompanionBtn.addEventListener("click", () => {
+    // Boş bir satır varken yenisini açma; önce onu doldurt.
+    const empty = companionInputs().find((i) => !cleanName(i.value));
+    if (empty) { empty.focus(); return; }
+    addCompanionRow("", true);
+  });
+
   function chooseAnswer(a) {
     answer = a;
     stepAnswer.hidden = true;
     stepName.hidden = false;
+    companionsBox.hidden = a !== "yes";
+    if (a === "yes" && companionInputs().length === 0) setCompanions(savedCompanions());
     statusEl.textContent = "";
     statusEl.classList.remove("is-error");
     nameHelp.textContent = "";
@@ -388,6 +469,27 @@
       nameInput.setAttribute("aria-invalid", "true");
       return;
     }
+    nameHelp.textContent = "";
+    nameHelp.classList.remove("is-error");
+    nameInput.removeAttribute("aria-invalid");
+
+    // Yanındakiler: boş satırlar atlanır, yazılanlar en az iki harf olmalı.
+    const companions = [];
+    if (answer === "yes") {
+      for (const inp of companionInputs()) {
+        const v = cleanName(inp.value);
+        if (!v) continue;
+        if (v.length < 2 || !/\p{L}/u.test(v)) {
+          companionsHelp.textContent = "Misafirin adını tam yaz ya da satırı boş bırak.";
+          companionsHelp.classList.add("is-error");
+          inp.setAttribute("aria-invalid", "true");
+          inp.focus();
+          return;
+        }
+        companions.push(v);
+      }
+    }
+
     submitBtn.disabled = true;
     statusEl.classList.remove("is-error");
     statusEl.textContent = "Kaydediliyor…";
@@ -395,13 +497,15 @@
       const res = await fetch((E.apiBase || "") + "/api/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answer, name, visitor: visitorId() })
+        body: JSON.stringify({ answer, name, companions, visitor: visitorId() })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) throw new Error(data.error || "server");
       LS.set("davet.answer", answer);
       LS.set("davet.name", name);
-      showDone(answer, name);
+      LS.set("davet.companions", JSON.stringify(companions));
+      setCompanions(companions);
+      showDone(answer, name, companions.length);
     } catch (e) {
       statusEl.classList.add("is-error");
       statusEl.textContent = "Kaydedilemedi. Bağlantını kontrol edip tekrar dene.";
@@ -410,14 +514,16 @@
     }
   });
 
-  function showDone(a, name) {
+  function showDone(a, name, extra) {
     form.hidden = true;
     done.hidden = false;
     statusEl.textContent = "";
     const first = name ? name.split(" ")[0] : "";
     if (a === "yes") {
       $("#done-title").textContent = first ? `Teşekkürler, ${first}.` : "Teşekkürler.";
-      $("#done-text").textContent = "Adını listeye ekledik. Masada görüşürüz.";
+      $("#done-text").textContent = extra > 0
+        ? `Seni ve ${extra} misafirini listeye ekledik. Masada görüşürüz.`
+        : "Adını listeye ekledik. Masada görüşürüz.";
     } else {
       $("#done-title").textContent = first ? `Anlaşıldı, ${first}.` : "Anlaşıldı.";
       $("#done-text").textContent = "Haber verdiğin için teşekkürler. Bir dahaki sefere.";
@@ -435,7 +541,9 @@
   /* ---------- Başlat ---------- */
   fillDetails();
   const prev = LS.get("davet.answer");
-  if (prev === "yes" || prev === "no") showDone(prev, LS.get("davet.name") || "");
+  if (prev === "yes" || prev === "no") {
+    showDone(prev, LS.get("davet.name") || "", prev === "yes" ? savedCompanions().length : 0);
+  }
 
   if (reduceMotion) {
     finish();

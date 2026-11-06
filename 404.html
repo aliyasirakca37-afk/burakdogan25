@@ -178,6 +178,14 @@
           <label id="name-label" for="name" class="field-label">Adın ve soyadın</label>
           <input id="name" name="name" type="text" class="field" autocomplete="name" maxlength="80" spellcheck="false">
           <p id="name-help" class="help"></p>
+
+          <fieldset id="companions" class="companions" hidden>
+            <legend class="field-label">Yanında birini getireceksen lütfen onun da ismini gir</legend>
+            <div id="companion-rows" class="companion-rows"></div>
+            <button type="button" id="add-companion" class="btn-add"><span class="plus" aria-hidden="true">+</span><span>Bir kişi daha ekle</span></button>
+            <p id="companions-help" class="help" role="status" aria-live="polite"></p>
+          </fieldset>
+
           <div class="actions">
             <button type="submit" id="submit" class="btn btn-primary">Katılımımı onayla</button>
             <button type="button" id="back" class="btn btn-quiet">Geri</button>
